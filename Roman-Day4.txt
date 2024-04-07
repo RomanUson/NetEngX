@@ -1,0 +1,343 @@
+Day4
+Task1: Fundamentals of starting a Cyber Secuity
+
+Task2: How to exploit
+
+task 5: implementing basic cisco security using extended
+access-list:
+ex. 1 you are the NSE and configure FW policy, with these conditions:
+cm is web server only: 80 and 443
+cm2 is an ssh and dns server only: 22 and 53
+
+cm is ssh, sccp, sip server:
+cm2 is an http, https, dns server:
+
+
+Ex 2:
+conf t
+no access-list 101 
+access-list 101 permit tcp Any host cm eq 22
+access-list 101 permit tcp Any host cm eq 2000
+access-list 101 permit tcp Any host cm eq 5060
+access-list 101 permit tcp Any host cm2 eq 80
+access-list 101 permit tcp Any host cm2 eq 443
+access-list 101 permit tcp Any host cm2 eq 53 
+
+int fa 0/0
+ip access-group 101 in
+do sh ip access-list 101
+end
+
+Ex 3:
+cm is telnet ssh , dns
+cm2 is an ICMP/ping , sccp , https server
+
+conf t
+no access-list 102 
+access-list 102 permit tcp Any host cm eq 23
+access-list 102 permit tcp Any host cm eq 22
+access-list 102 permit tcp Any host cm eq 53
+access-list 102 permit icmp Any host cm2 
+access-list 102 permit tcp Any host cm2 eq 2000
+access-list 102 permit tcp Any host cm2 eq 443
+int fa 0/0
+ip access-group 102 in
+do sh ip access-list 102
+end
+
+
+
+Magic formula: 
+"Protocol 		hacker		 victim		 port"
+tcp,udp,icmp,IP      Any(0.0.0.0/32)		
+
+@Cucm: Use extended ACL 100-199
+conf t
+no access-list 100 
+access-list 100 permit tcp Any host cm eq 80
+access-list 100 permit tcp Any host cm eq 443
+access-list 100 permit icmp Any host cm2
+access-list 100 permit tcp Any host cm2 eq 22
+access-list 100 permit tcp Any host cm2 eq 53
+int fa 0/0
+ip access-group 100 in
+do sh ip access-list 100
+end
+
+Unlock the FW:
+conf t
+int fa 0/0
+no ip access-group 101 in
+end
+
+
+task3: how to protect your basic FW
+task 1: create a policy to call/ping only your column
+
+@Edge:
+Use standard access-list to IP address:
+
+conf t
+no access-list 1
+access-list 1 permit 10.12.0.0 0.0.255.255
+access-list 1 permit 10.22.0.0 0.0.255.255
+access-list 1 permit 10.32.0.0 0.0.255.255
+access-list 1 permit 10.51.0.0 0.0.255.255
+access-list 1 permit 10.52.0.0 0.0.255.255
+! access-list 1 deny any
+Int Gi 0/0/1
+ip access-group 1 in
+do sh ip access-list 1
+
+Bukas FW:
+conf t
+Int Gi 0/0/1
+no ip access-group 1 in
+do sh ip access-list 1
+
+Task 5.1:
+conf t
+no access-list 2
+access-list 2 permit 10.51.0.0 0.0.255.255
+access-list 2 permit 10.52.0.0 0.0.255.255
+! access-list 2 deny any
+Int Gi 0/0/1
+ip access-group 2 in
+do sh ip access-list 2
+
+Task 5.2:
+conf t
+no access-list 3
+access-list 3 permit 10.51.0.0 0.0.255.255
+access-list 3 permit 10.52.0.0 0.0.255.255
+! access-list 3 deny any
+Int Gi 0/0/1
+ip access-group 3 in
+do sh ip access-list 3
+
+
+Task 5.3:
+conf t
+no access-list 4
+access-list 4 permit 10.51.0.0 0.0.255.255
+! access-list 4 deny any
+Int Gi 0/0/1
+ip access-group 4 in
+do sh ip access-list 4
+
+do sh ip access-list 1
+do sh ip access-list 2
+do sh ip access-list 3
+do sh ip access-list 4
+
+Task 6:
+Type of network FW
+
+Saiyan: packetfilter firewall: CCNA
+	cisco extended ACL
+	linux ip tables
+	"Buti kesa wala"
+	Block: Sip/Dip
+Super saiyan: application/statefull FW:
+
+Dabest: NextgenFirewall + A.I
+
+Task 7:
+Implement packet filter FW
+
+Task: 8: Assignment
+Create your own home CyberSecLab:
+"FW,VPN,NAT,ssh,dhcp,IntrusionPreventionsSy,Detection"
+UTM: unifiedThreatMgmt"
+
+Ingredients: Kali.7z, VMware, csr1000v
+
+1. install csr1000v @home
+2. nat, vmnet, vmnet3
+3. type:
+enable
+config t
+no logging console
+no ip domain lookup
+int gi 1
+no shut
+ip add 192.168.108.8 255.255.255.0
+line vty 0 14
+transport input  all
+exec-time out 0 0
+
+conf t
+int gi 2
+ip add 192.168.102.8 255.255.255.0
+no shut
+int gi 3
+ip add 192.168.103.8 255.255.255.0
+no shut
+
+@Task 9: Network Engineer ultimate Skills:
+
+@Skill1: AAA, Authorization, Accounting, Athentication
+Conf t
+username annecurtis privilege 15 secret password
+username roman privilege 15 secret password
+line vty 0 14
+transport input telnet ssh
+
+@SkillNo2: SecureShellVersion2: sshv2
+ssh is very secure protocol for admins:
+conf t
+ip domain lookup
+ip domain name roman.com
+crypto key generate rsa
+ip ssh version 2
+line vty 0 14
+transport input ssh telnet
+
+@SkillNo3: Network Address Translation\Pa-hotspot
+give internet to LinuxServers in blg2 and 3
+
+@Linux:
+Linux2: sudo ifconfig eth0 192.168.102.50 netmask 255.255.255.0 up
+sudo route add default gw 192.168.102.8 
+
+Linux2: sudo ifconfig eth0 192.168.103.50 netmask 255.255.255.0 up
+sudo route add default gw 192.168.103.8 
+
+Use Cisco to give internet to linux2 and linux3:
+@UTM
+conf t
+int gi 1
+ip nat OUTSIDE
+int gi 2
+ip nat INSIDE
+int gi 3
+ip nat INSIDE
+access-list 8 permit 192.168.102.0 0.0.0.255
+access-list 8 permit 192.168.103.0 0.0.0.255
+!!!static NAT ip address
+ip nat inside source static 192.168.102.50 192.168.108.69
+ip nat inside source static 192.168.103.50 192.168.108.77
+ip nat inside source list 8 int gi 1 overload
+do sh ip nat translation
+
+Give internet to UTM:
+conf t
+ip route 0.0.0.0 0.0.0.0 192.168.108.2
+
+
+@SkillNo4:
+configure UTM to sync with google USA: time.google.com: 216.239.35.4
+conf t
+ip domain lookup
+ip name-server 8.8.8.8 1.1.1.1
+no ntp server time.google.com
+do sh ntp association
+do sh clock
+
+@SkillNo5: Learn to block all the top porn sites and be holy.
+Trivia: All the top 100 porn sites are owned by 5 people
+pornhub.com 66.254.0.0
+iyottube.com 68.235.0.0
+pinayflix.com 104.21.0.0
+xhamster.com 88.208.60.0
+
+conf t
+no access-list 69
+access-list 69 deny 66.254.0.0 0.0.255.255
+access-list 69 deny 66.235.0.0 0.0.255.255
+access-list 69 deny 104.21.0.0 0.0.255.255
+access-list 69 deny 88.208.0.0 0.0.255.255
+access-list 69 deny any
+int gi 1
+ip access-group 69 in
+end
+---
+
+@Access point \ WLC
+
+Recover-Config
+
+Recover-Config
+Recover-Config
+
+sh ip dhcp binding
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
